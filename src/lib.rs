@@ -83,13 +83,8 @@ pub fn initialise() {
 const AIR_NITROGEN_RATIO: f32 = 0.79;
 const WATER_VAPOUR_PRESSURE: f32 = 0.063;
 
-#[wasm_bindgen]
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub struct Ata(f32);
-#[wasm_bindgen]
-pub fn js_ata(ata: f32) -> Ata {
-    Ata(ata)
-}
 
 impl Add for Ata {
     type Output = Ata;
@@ -105,21 +100,11 @@ impl Display for Ata {
     }
 }
 
-#[wasm_bindgen]
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub struct Minutes(f32);
-#[wasm_bindgen]
-pub fn js_minutes(minutes: f32) -> Minutes {
-    Minutes(minutes)
-}
 
-#[wasm_bindgen]
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub struct Feet(f32);
-#[wasm_bindgen]
-pub fn js_feet(feet: f32) -> Feet {
-    Feet(feet)
-}
 
 impl Feet {
     fn depth_atmospheric_pressure(&self) -> Ata {
@@ -127,7 +112,6 @@ impl Feet {
     }
 }
 
-#[wasm_bindgen]
 pub struct TissueCompartment {
     // constants
     surface_m_value: Ata,
@@ -137,9 +121,7 @@ pub struct TissueCompartment {
     nitrogen_concentration: Ata,
 }
 
-#[wasm_bindgen]
 impl TissueCompartment {
-    #[wasm_bindgen(constructor)]
     pub fn new(half_time: f32, surface_m_value: f32, m_slope: f32) -> TissueCompartment {
         TissueCompartment {
             surface_m_value: Ata(surface_m_value),
