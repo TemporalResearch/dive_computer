@@ -1,8 +1,31 @@
 use std::cmp::min;
 use std::fmt::{Display, Formatter};
 use std::ops::Add;
+use std::cell::RefCell;
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::{window, Window, Document};
+use web_sys::{window, Window, Document, HtmlInputElement};
+use wasm_bindgen::JsCast;
+
+thread_local! {
+    static DIVE_COMPUTER: RefCell<DiveComputer> = RefCell::new(DiveComputer::new());
+    static DOCUMENT: RefCell<Document> = RefCell::new(window().unwrap().document().unwrap());
+}
+
+struct DiveComputer {
+    c_20: TissueCompartment,
+}
+
+impl DiveComputer {
+    fn new() -> Self {
+        Self {
+            c_20: TissueCompartment::new(20f32, 3f32, 0.3f32),
+        }
+    }
+
+    fn run_iteration(&mut self, time_at_depth: Minutes, depth: Feet) {
+        self.c_20.simulate(time_at_depth, depth, 0.79);
+    }
+}
 
 #[wasm_bindgen]
 extern "C" {
@@ -12,22 +35,44 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-pub fn greet(name: &str) {
-    console_log("Hello there");
+pub fn run_iteration() {
+    DOCUMENT.with(|doc| {
+        let depth: f32 = doc.borrow()
+            .get_element_by_id("depth")
+            .unwrap()
+            .dyn_into::<HtmlInputElement>()
+            .unwrap()
+            .value()
+            .parse()
+            .unwrap();
+        let time_at_depth: f32 = doc.borrow()
+            .get_element_by_id("time_at_depth")
+            .unwrap()
+            .dyn_into::<HtmlInputElement>()
+            .unwrap()
+            .value()
+            .parse()
+            .unwrap();
 
+        console_log("we busy simulating!");
+
+        DIVE_COMPUTER.with(|dc| {
+            dc.borrow_mut()
+                .run_iteration(Minutes(time_at_depth), Feet(depth));
+        });
+    })
+}
+
+#[wasm_bindgen]
+pub fn initialise() {
     let window: Window = window().unwrap();
     let document: Document = window
         .document()
         .unwrap();
 
-    console_log("Hello there 2");
-
-    console_log("Hello there 3");
     document.get_element_by_id("nitro_cont")
         .unwrap()
         .set_inner_html("0.79");
-
-    console_log("Hello there 4");
 }
 
 const AIR_NITROGEN_RATIO: f32 = 0.79;

@@ -8,26 +8,17 @@
         }
     </script>
     <script type="module">
-        import init, {greet, TissueCompartment, js_ata, js_minutes, js_feet} from "./src/web_dive_computer.js"
+        import init, {initialise, run_iteration} from "./src/web_dive_computer.js"
 
         let comp_20;
 
 
         init().then(() => {
-            comp_20 = new TissueCompartment(20, 3, 0.3);
-
-            greet("WebAssembly");
+            initialise();
 
             document.getElementById("exe_sim")
                 .addEventListener("click", run_iteration);
         })
-
-
-        function run_iteration() {
-            let depth = document.getElementById("depth").value;
-            let time_at_depth = document.getElementById("time_at_depth").value;
-            comp_20.simulate(js_minutes(time_at_depth), js_feet(depth), 0.79);
-        }
     </script>
 </head>
 <body>
