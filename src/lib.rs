@@ -1,4 +1,3 @@
-use std::cmp::min;
 use std::fmt::{Display, Formatter};
 use std::ops::Add;
 use std::cell::RefCell;
@@ -25,12 +24,14 @@ impl DiveComputer {
     fn run_iteration(&mut self, time_at_depth: Minutes, depth: Feet) {
         self.c_20.simulate(time_at_depth, depth, 0.79);
     }
+
+    fn c_20(&self) -> &TissueCompartment {
+        &self.c_20
+    }
 }
 
 #[wasm_bindgen]
 extern "C" {
-    pub fn alert(s: &str);
-
     pub fn console_log(s: &str);
 }
 
@@ -54,13 +55,17 @@ pub fn run_iteration() {
             .parse()
             .unwrap();
 
-        console_log("we busy simulating!");
-
         DIVE_COMPUTER.with(|dc| {
             dc.borrow_mut()
                 .run_iteration(Minutes(time_at_depth), Feet(depth));
+
+            doc.borrow()
+                .get_element_by_id("comp20_nitro")
+                .unwrap()
+                .set_inner_html(&format!("{}", dc.borrow().c_20().nitrogen_concentration()));
         });
-    })
+
+    });
 }
 
 #[wasm_bindgen]
@@ -70,7 +75,7 @@ pub fn initialise() {
         .document()
         .unwrap();
 
-    document.get_element_by_id("nitro_cont")
+    document.get_element_by_id("comp20_nitro")
         .unwrap()
         .set_inner_html("0.79");
 }
@@ -155,10 +160,9 @@ impl TissueCompartment {
                 (inspired_pressure - self.nitrogen_concentration.0)
                 * (1f32 - std::f32::consts::E.powf(-(k * time_at_depth.0)))
             ));
+    }
 
-        window().unwrap().document().unwrap()
-            .get_element_by_id("nitro_cont")
-            .unwrap()
-            .set_inner_html(&format!("{}", self.nitrogen_concentration));
+    fn nitrogen_concentration(&self) -> Ata {
+        self.nitrogen_concentration
     }
 }
