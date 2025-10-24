@@ -1,0 +1,46 @@
+<html>
+<head>
+    <title>Dive Computer</title>
+
+    <script>
+        function console_log(val) {
+            console.log(val);
+        }
+    </script>
+    <script type="module">
+        import init, {greet, TissueCompartment, js_ata, js_minutes, js_feet} from "./src/web_dive_computer.js"
+
+        let comp_20;
+
+
+        init().then(() => {
+            comp_20 = new TissueCompartment(20, 3, 0.3);
+
+            greet("WebAssembly");
+
+            document.getElementById("exe_sim")
+                .addEventListener("click", run_iteration);
+        })
+
+
+        function run_iteration() {
+            let depth = document.getElementById("depth").value;
+            let time_at_depth = document.getElementById("time_at_depth").value;
+            comp_20.simulate(js_minutes(time_at_depth), js_feet(depth), 0.79);
+        }
+    </script>
+</head>
+<body>
+<p>
+    <b>WARNING: </b> Do not use for real world diving, this computer is experimental and has not been tested for safety.
+</p>
+<h1>Dive Computer</h1>
+
+<label>Depth (feet): </label><input type="number" id="depth"/><br/>
+<label>Time at Depth (minutes): </label><input type="number" id="time_at_depth"/>
+<input type="button" id="exe_sim" value="simulate!"/>
+
+<p>Current Nitrogen Concentration: <b id="nitro_cont"></b></p>
+
+</body>
+</html>
