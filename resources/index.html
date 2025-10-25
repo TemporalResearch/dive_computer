@@ -10,14 +10,35 @@
     <script type="module">
         import init, {initialise, run_iteration} from "./src/web_dive_computer.js"
 
-        let comp_20;
+        var simulationId = NaN;
 
+        function play_real_time() {
+            document.getElementById("time_at_depth").value = 0.1;
+            document.getElementById("time_at_depth").disabled = true;
+            document.getElementById("exe_sim").disabled = true;
+
+            simulationId = setInterval(run_iteration, 100);
+        }
+
+        function pause_real_time() {
+            document.getElementById("time_at_depth").value = 0;
+            document.getElementById("time_at_depth").disabled = false;
+            document.getElementById("exe_sim").disabled = false;
+
+            if (!isNaN(simulationId)) {
+                clearInterval(simulationId);
+            }
+        }
 
         init().then(() => {
             initialise();
 
             document.getElementById("exe_sim")
                 .addEventListener("click", run_iteration);
+            document.getElementById("play_button")
+                .addEventListener("click", play_real_time);
+            document.getElementById("pause_button")
+                .addEventListener("click", pause_real_time);
         })
     </script>
 </head>
@@ -29,7 +50,9 @@
 
 <input type="number" id="depth" value="0"/><label> : Depth (feet)</label><br/>
 <input type="number" id="time_at_depth"/><label> : Time at Depth (minutes)</label><br/>
-<input type="button" id="exe_sim" value="simulate!"/>
+<input type="button" id="exe_sim" value="simulate!"/><br/>
+<input type="button" id="play_button" value="play"/><label>Real time sim (1 second represents 1 minute)</label><br/>
+<input type="button" id="pause_button" value="pause"/><label>Pause real time sim</label><br/>
 
 <p>Limiting Compartment: <b id="chosen_compartment"></b></p>
 <p>Depth ceiling: <b id="chosen_compartment_depth_ceiling"></b></p>
