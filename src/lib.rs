@@ -65,24 +65,14 @@ pub fn run_iteration() {
                     chosen_compartment_min_safe_depth = min_safe_depth;
                 }
 
-                doc.borrow()
-                    .get_element_by_id(&format!("compartment_display_{}", i))
-                    .unwrap()
-                    .set_inner_html(&format!("{}", compartment.nitrogen_concentration()));
-
-                doc.borrow()
-                    .get_element_by_id(&format!("compartment_m_val_{}", i))
-                    .unwrap()
-                    .set_inner_html(&format!("{}",
-                        compartment.get_m_value_at_depth(CURRENT_DEPTH.get())));
-
                 update_compartment_graph(&doc.borrow(), i, compartment);
 
 
-                doc.borrow()
-                    .get_element_by_id(&format!("compartment_min_depth_{}", i))
-                    .unwrap()
-                    .set_inner_html(&format!("{}", min_safe_depth));
+                // TODO: incorporate this into our graph.
+                // doc.borrow()
+                //     .get_element_by_id(&format!("compartment_min_depth_{}", i))
+                //     .unwrap()
+                //     .set_inner_html(&format!("{}", min_safe_depth));
             }
 
             doc.borrow()
