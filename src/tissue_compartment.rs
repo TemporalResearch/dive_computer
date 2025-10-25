@@ -35,4 +35,8 @@ impl TissueCompartment {
     pub(crate) fn nitrogen_concentration(&self) -> Ata {
         self.nitrogen_concentration
     }
+
+    pub(crate) fn half_time(&self) -> Minutes {
+        self.half_time
+    }
 }
