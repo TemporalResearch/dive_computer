@@ -32,3 +32,9 @@ impl Feet {
         Ata(1f32 + (self.0 / 33f32))
     }
 }
+
+impl Display for Feet {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!("{}ft", self.0))
+    }
+}

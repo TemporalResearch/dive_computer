@@ -43,4 +43,11 @@ impl TissueCompartment {
     pub(crate) fn get_m_value_at_depth(&self, depth: Feet) -> Ata {
         Ata(self.surface_m_value.0 + (depth.0 * self.m_slope))
     }
+
+    pub(crate) fn get_min_safe_depth(&self) -> Feet {
+        let max_depth = (self.nitrogen_concentration.0 - self.surface_m_value.0)
+            / self.m_slope;
+        let max_depth = max_depth.max(0f32);
+        Feet(max_depth)
+    }
 }
