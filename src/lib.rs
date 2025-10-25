@@ -76,7 +76,7 @@ pub fn run_iteration() {
                     .set_inner_html(&format!("{}",
                         compartment.get_m_value_at_depth(CURRENT_DEPTH.get())));
 
-                update_compartment_graph(doc, i, compartment);
+                update_compartment_graph(&doc.borrow(), i, compartment);
 
 
                 doc.borrow()
@@ -164,7 +164,7 @@ const GRAPH_Y_OFFSET: i32 = 50;
 const GRAPH_WIDTH: i32 = 200;
 const GRAPH_HEIGHT: i32 = 200;
 
-fn create_compartment_svg(compartment_index: usize, compartment_half_time: Minutes) -> Element {
+fn create_compartment_svg(compartment_index: usize) -> Element {
     SvgRenderer::new(200, 250)
         .rect(0, GRAPH_Y_OFFSET, GRAPH_WIDTH, GRAPH_HEIGHT, "beige", &format!("m_val_at_depth_{}", compartment_index))
         .text(6, GRAPH_Y_OFFSET - 4, "black", 18, &format!("m_val_at_depth_display_{}", compartment_index), "3.45ata")
@@ -172,19 +172,19 @@ fn create_compartment_svg(compartment_index: usize, compartment_half_time: Minut
         .text(6, GRAPH_Y_OFFSET + 78, "black", 18, &format!("surface_m_val_display_{}", compartment_index), "2.0ata")
         .rect(100, GRAPH_Y_OFFSET + 100, GRAPH_WIDTH / 2, 100, "goldenrod", &format!("current_sat_{}", compartment_index))
         .text(106, GRAPH_Y_OFFSET + 118, "black", 18, &format!("current_sat_display_{}", compartment_index), "0.79ata")
-        .text(6, GRAPH_Y_OFFSET + 220, "black", 20, "compartment_label", &format!("Compartment {}mins", compartment_half_time.0))
+        .text(6, GRAPH_Y_OFFSET + 220, "black", 20, "compartment_label", &format!("Compartment {}mins", "5"))
         .get_element()
         .clone()
 }
 
-fn update_compartment_graph(doc: &RefCell<Document>, compartment_index: usize, compartment: &TissueCompartment) {
+fn update_compartment_graph(doc: &Document, compartment_index: usize, compartment: &TissueCompartment) {
     let current_sat_graph_size =
         ((compartment.nitrogen_concentration().0 / compartment.get_m_value_at_depth(CURRENT_DEPTH.get()).0)
             * GRAPH_HEIGHT as f32) as i32;
-    let current_sat_rect = doc.borrow()
+    let current_sat_rect = doc
         .get_element_by_id(&format!("current_sat_{}", compartment_index))
         .unwrap();
-    let current_sat_display = doc.borrow()
+    let current_sat_display = doc
         .get_element_by_id(&format!("current_sat_display_{}", compartment_index))
         .unwrap();
     current_sat_display.set_text_content(Some(&format!("{}", compartment.nitrogen_concentration())));
@@ -198,10 +198,10 @@ fn update_compartment_graph(doc: &RefCell<Document>, compartment_index: usize, c
     let current_surface_m_value_size =
         ((compartment.get_m_value_at_depth(Feet(0f32)).0 / compartment.get_m_value_at_depth(CURRENT_DEPTH.get()).0)
             * GRAPH_HEIGHT as f32) as i32;
-    let surface_m_value_rect = doc.borrow()
+    let surface_m_value_rect = doc
         .get_element_by_id(&format!("surface_m_val_{}", compartment_index))
         .unwrap();
-    let surface_m_value_display = doc.borrow()
+    let surface_m_value_display = doc
         .get_element_by_id(&format!("surface_m_val_display_{}", compartment_index))
         .unwrap();
     surface_m_value_display.set_attribute(
@@ -213,12 +213,12 @@ fn update_compartment_graph(doc: &RefCell<Document>, compartment_index: usize, c
 
         // .get_element_by_id(&format!("surface_m_val_{}", GRAPH_Y_OFFSET + (GRAPH_HEIGHT - current_sat_graph_size)))
 
-    let m_val_at_depth_display = doc.borrow()
+    let m_val_at_depth_display = doc
         .get_element_by_id(&format!("m_val_at_depth_display_{}", compartment_index))
         .unwrap();
     m_val_at_depth_display.set_text_content(Some(&format!("{}", compartment.get_m_value_at_depth(CURRENT_DEPTH.get()))));
 
-    let surface_m_val_display = doc.borrow()
+    let surface_m_val_display = doc
         .get_element_by_id(&format!("surface_m_val_display_{}", compartment_index))
         .unwrap();
     surface_m_val_display.set_text_content(Some(&format!("{}", compartment.get_m_value_at_depth(Feet(0f32)))));
@@ -231,8 +231,6 @@ pub fn initialise() {
         .document()
         .unwrap();
 
-    let compartment_list: Element = document.get_element_by_id("compartment_list")
-        .unwrap();
     let compartment_graph: Element = document.get_element_by_id("compartment_graph")
         .unwrap();
 
@@ -242,39 +240,9 @@ pub fn initialise() {
 
     DIVE_COMPUTER.with(|dc| {
         for (i, compartment) in dc.borrow().compartments().iter().enumerate() {
-            let compartment_display_row = document.create_element("p").unwrap();
+            compartment_graph.append_child(&create_compartment_svg(i));
 
-            let compartment_display_label = document.create_element("span").unwrap();
-            compartment_display_label.set_text_content(
-                Some(&format!("Compartment {}min: ", compartment.half_time().0)));
-
-            let compartment_display = document.create_element("b").unwrap();
-            compartment_display.set_id(&format!("compartment_display_{}", i));
-            compartment_display.set_text_content(Some("0.79ata"));
-
-            let m_val_label = document.create_text_node(" ; M-Val at Depth: ");
-            let compartment_m_val_display = document.create_element("b").unwrap();
-            compartment_m_val_display.set_id(&format!("compartment_m_val_{}", i));
-            compartment_m_val_display.set_text_content(Some(
-                &format!("{}", compartment.get_m_value_at_depth(Feet(0f32)))));
-
-            let max_safe_depth_label = document.create_text_node(" ; Min safe depth: ");
-            let max_safe_depth_display = document.create_element("b").unwrap();
-            max_safe_depth_display.set_id(&format!("compartment_min_depth_{}", i));
-            max_safe_depth_display.set_text_content(Some(
-                &format!("{}", compartment.get_min_safe_depth())
-            ));
-
-            let _ = compartment_display_row.append_child(&compartment_display_label);
-            let _ = compartment_display_row.append_child(&compartment_display);
-            let _ = compartment_display_row.append_child(&m_val_label);
-            let _ = compartment_display_row.append_child(&compartment_m_val_display);
-            let _ = compartment_display_row.append_child(&max_safe_depth_label);
-            let _ = compartment_display_row.append_child(&max_safe_depth_display);
-
-            let _ = compartment_list.append_child(&compartment_display_row);
-
-            compartment_graph.append_child(&create_compartment_svg(i, compartment.half_time()));
+            update_compartment_graph(&document, i, compartment);
         }
     });
 }

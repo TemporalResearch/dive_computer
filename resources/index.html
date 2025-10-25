@@ -27,8 +27,8 @@
 </p>
 <h1>Dive Computer</h1>
 
-<label>Depth (feet): </label><input type="number" id="depth"/><br/>
-<label>Time at Depth (minutes): </label><input type="number" id="time_at_depth"/>
+<input type="number" id="depth" value="0"/><label> : Depth (feet)</label><br/>
+<input type="number" id="time_at_depth"/><label> : Time at Depth (minutes)</label><br/>
 <input type="button" id="exe_sim" value="simulate!"/>
 
 <p>Limiting Compartment: <b id="chosen_compartment"></b></p>
@@ -36,10 +36,10 @@
 
 <p>Current Depth: <b><span id="current_depth"></span>ft</b></p>
 
-<img src="compartment_display.svg"/>
 <div id="compartment_graph"></div>
+<img src="compartment_display.svg"/>
 
-<div id="compartment_list"></div>
+<!--<div id="compartment_list"></div>-->
 
 </body>
 </html>
