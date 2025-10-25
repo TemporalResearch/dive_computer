@@ -160,34 +160,68 @@ impl SvgRenderer {
     // TODO: text
 }
 
+const GRAPH_Y_OFFSET: i32 = 50;
+const GRAPH_WIDTH: i32 = 200;
+const GRAPH_HEIGHT: i32 = 200;
+
 fn create_compartment_svg(compartment_index: usize, compartment_half_time: Minutes) -> Element {
     SvgRenderer::new(200, 250)
-        .rect(0, 0, 200, 200, "beige", &format!("m_val_at_depth_{}", compartment_index))
-        .text(6, 18, "black", 18, &format!("m_val_at_depth_display_{}", compartment_index), "3.45ata")
-        .rect(0, 60, 200, 140, "lightgreen", &format!("surface_m_val_{}", compartment_index))
-        .text(6, 78, "black", 18, &format!("surface_m_val_display_{}", compartment_index), "2.0ata")
-        .rect(100, 100, 100, 100, "goldenrod", &format!("current_sat_{}", compartment_index))
-        .text(106, 118, "black", 18, &format!("current_sat_display_{}", compartment_index), "0.79ata")
-        .text(6, 220, "black", 20, "compartment_label", &format!("Compartment {}mins", compartment_half_time.0))
+        .rect(0, GRAPH_Y_OFFSET, GRAPH_WIDTH, GRAPH_HEIGHT, "beige", &format!("m_val_at_depth_{}", compartment_index))
+        .text(6, GRAPH_Y_OFFSET - 4, "black", 18, &format!("m_val_at_depth_display_{}", compartment_index), "3.45ata")
+        .rect(0, GRAPH_Y_OFFSET + 60, GRAPH_WIDTH, 140, "lightgreen", &format!("surface_m_val_{}", compartment_index))
+        .text(6, GRAPH_Y_OFFSET + 78, "black", 18, &format!("surface_m_val_display_{}", compartment_index), "2.0ata")
+        .rect(100, GRAPH_Y_OFFSET + 100, GRAPH_WIDTH / 2, 100, "goldenrod", &format!("current_sat_{}", compartment_index))
+        .text(106, GRAPH_Y_OFFSET + 118, "black", 18, &format!("current_sat_display_{}", compartment_index), "0.79ata")
+        .text(6, GRAPH_Y_OFFSET + 220, "black", 20, "compartment_label", &format!("Compartment {}mins", compartment_half_time.0))
         .get_element()
         .clone()
 }
 
 fn update_compartment_graph(doc: &RefCell<Document>, compartment_index: usize, compartment: &TissueCompartment) {
-    doc.borrow()
+    let current_sat_graph_size =
+        ((compartment.nitrogen_concentration().0 / compartment.get_m_value_at_depth(CURRENT_DEPTH.get()).0)
+            * GRAPH_HEIGHT as f32) as i32;
+    let current_sat_rect = doc.borrow()
+        .get_element_by_id(&format!("current_sat_{}", compartment_index))
+        .unwrap();
+    let current_sat_display = doc.borrow()
         .get_element_by_id(&format!("current_sat_display_{}", compartment_index))
-        .unwrap()
-        .set_text_content(Some(&format!("{}", compartment.nitrogen_concentration())));
+        .unwrap();
+    current_sat_display.set_text_content(Some(&format!("{}", compartment.nitrogen_concentration())));
+    current_sat_display.set_attribute(
+        "y", &format!("{}", GRAPH_Y_OFFSET + (GRAPH_HEIGHT - current_sat_graph_size) + 18));
+    current_sat_rect.set_attribute(
+        "y", &format!("{}", GRAPH_Y_OFFSET + GRAPH_HEIGHT - current_sat_graph_size));
+    current_sat_rect.set_attribute(
+        "height", &format!("{}", current_sat_graph_size));
 
-    doc.borrow()
-        .get_element_by_id(&format!("m_val_at_depth_display_{}", compartment_index))
-        .unwrap()
-        .set_text_content(Some(&format!("{}", compartment.get_m_value_at_depth(CURRENT_DEPTH.get()))));
-
-    doc.borrow()
+    let current_surface_m_value_size =
+        ((compartment.get_m_value_at_depth(Feet(0f32)).0 / compartment.get_m_value_at_depth(CURRENT_DEPTH.get()).0)
+            * GRAPH_HEIGHT as f32) as i32;
+    let surface_m_value_rect = doc.borrow()
+        .get_element_by_id(&format!("surface_m_val_{}", compartment_index))
+        .unwrap();
+    let surface_m_value_display = doc.borrow()
         .get_element_by_id(&format!("surface_m_val_display_{}", compartment_index))
-        .unwrap()
-        .set_text_content(Some(&format!("{}", compartment.get_m_value_at_depth(Feet(0f32)))));
+        .unwrap();
+    surface_m_value_display.set_attribute(
+        "y", &format!("{}", GRAPH_Y_OFFSET + (GRAPH_HEIGHT - current_surface_m_value_size) + 18));
+    surface_m_value_rect.set_attribute(
+        "y", &format!("{}", GRAPH_Y_OFFSET + GRAPH_HEIGHT - current_surface_m_value_size));
+    surface_m_value_rect.set_attribute(
+        "height", &format!("{}", current_surface_m_value_size));
+
+        // .get_element_by_id(&format!("surface_m_val_{}", GRAPH_Y_OFFSET + (GRAPH_HEIGHT - current_sat_graph_size)))
+
+    let m_val_at_depth_display = doc.borrow()
+        .get_element_by_id(&format!("m_val_at_depth_display_{}", compartment_index))
+        .unwrap();
+    m_val_at_depth_display.set_text_content(Some(&format!("{}", compartment.get_m_value_at_depth(CURRENT_DEPTH.get()))));
+
+    let surface_m_val_display = doc.borrow()
+        .get_element_by_id(&format!("surface_m_val_display_{}", compartment_index))
+        .unwrap();
+    surface_m_val_display.set_text_content(Some(&format!("{}", compartment.get_m_value_at_depth(Feet(0f32)))));
 }
 
 #[wasm_bindgen]
