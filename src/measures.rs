@@ -17,7 +17,7 @@ impl Add for Ata {
 
 impl Display for Ata {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&format!("{}ata", self.0))
+        f.write_str(&format!("{:.2}ata", self.0))
     }
 }
 
