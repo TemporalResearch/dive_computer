@@ -30,6 +30,12 @@
             }
         }
 
+        function update_depth_slider() {
+            let depth = document.getElementById("depth_slider").value;
+            document.getElementById("depth_slider_val")
+                .innerText = depth;
+        }
+
         init().then(() => {
             initialise();
 
@@ -39,8 +45,16 @@
                 .addEventListener("click", play_real_time);
             document.getElementById("pause_button")
                 .addEventListener("click", pause_real_time);
+            document.getElementById("depth_slider")
+                .addEventListener("input", update_depth_slider);
         })
     </script>
+
+    <style>
+        input[type=range] {
+            writing-mode: vertical-lr;
+        }
+    </style>
 </head>
 <body>
 <p>
@@ -48,7 +62,7 @@
 </p>
 <h1>Dive Computer</h1>
 
-<input type="number" id="depth" value="0"/><label> : Depth (feet)</label><br/>
+<input type="range" min="0" max="200" value="0" id="depth_slider"/><label id="depth_slider_val">0</label>ft<label> : Depth (feet)</label><br/>
 <input type="number" id="time_at_depth"/><label> : Time at Depth (minutes)</label><br/>
 <input type="button" id="exe_sim" value="simulate!"/><br/>
 <input type="button" id="play_button" value="play"/><label>Real time sim (1 second represents 1 minute)</label><br/>
@@ -61,8 +75,6 @@
 
 <div id="compartment_graph"></div>
 <img src="compartment_display.svg"/>
-
-<!--<div id="compartment_list"></div>-->
 
 </body>
 </html>

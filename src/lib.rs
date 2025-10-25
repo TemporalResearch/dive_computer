@@ -29,7 +29,7 @@ extern "C" {
 pub fn run_iteration() {
     DOCUMENT.with(|doc| {
         let depth: f32 = doc.borrow()
-            .get_element_by_id("depth")
+            .get_element_by_id("depth_slider")
             .unwrap()
             .dyn_into::<HtmlInputElement>()
             .unwrap()
