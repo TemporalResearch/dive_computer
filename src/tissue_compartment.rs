@@ -39,4 +39,8 @@ impl TissueCompartment {
     pub(crate) fn half_time(&self) -> Minutes {
         self.half_time
     }
+
+    pub(crate) fn get_m_value_at_depth(&self, depth: Feet) -> Ata {
+        Ata(self.surface_m_value.0 + (depth.0 * self.m_slope))
+    }
 }
