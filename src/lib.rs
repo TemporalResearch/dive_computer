@@ -154,15 +154,15 @@ const GRAPH_Y_OFFSET: i32 = 50;
 const GRAPH_WIDTH: i32 = 200;
 const GRAPH_HEIGHT: i32 = 200;
 
-fn create_compartment_svg(compartment_index: usize) -> Element {
-    SvgRenderer::new(200, 250)
+fn create_compartment_svg(compartment_index: usize, half_time: Minutes) -> Element {
+    SvgRenderer::new(200, 300)
         .rect(0, GRAPH_Y_OFFSET, GRAPH_WIDTH, GRAPH_HEIGHT, "beige", &format!("m_val_at_depth_{}", compartment_index))
         .text(6, GRAPH_Y_OFFSET - 4, "black", 18, &format!("m_val_at_depth_display_{}", compartment_index), "3.45ata")
         .rect(0, GRAPH_Y_OFFSET + 60, GRAPH_WIDTH, 140, "lightgreen", &format!("surface_m_val_{}", compartment_index))
         .text(6, GRAPH_Y_OFFSET + 78, "black", 18, &format!("surface_m_val_display_{}", compartment_index), "2.0ata")
         .rect(100, GRAPH_Y_OFFSET + 100, GRAPH_WIDTH / 2, 100, "goldenrod", &format!("current_sat_{}", compartment_index))
         .text(106, GRAPH_Y_OFFSET + 118, "black", 18, &format!("current_sat_display_{}", compartment_index), "0.79ata")
-        .text(6, GRAPH_Y_OFFSET + 220, "black", 20, "compartment_label", &format!("Compartment {}mins", "5"))
+        .text(6, GRAPH_Y_OFFSET + 220, "black", 16, "compartment_label", &format!("Compartment {}mins", half_time.0))
         .get_element()
         .clone()
 }
@@ -230,7 +230,7 @@ pub fn initialise() {
 
     DIVE_COMPUTER.with(|dc| {
         for (i, compartment) in dc.borrow().compartments().iter().enumerate() {
-            compartment_graph.append_child(&create_compartment_svg(i));
+            compartment_graph.append_child(&create_compartment_svg(i, compartment.half_time()));
 
             update_compartment_graph(&document, i, compartment);
         }
